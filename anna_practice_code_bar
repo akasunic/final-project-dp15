@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Anna's Email Visualization</title>
+<link rel="stylesheet" href ="css/sample-d3.css">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+</head>
+
+<body>
+
+<div id ="chart"></div>
+
+</body>
+
+<script type="text/javascript">
+var dataset;
+var x_vals=[];
+var y_vals=[];
+
+//set up margins
+var margin = {top: 20, right: 20, bottom: 20, left: 200},
+    width = 960 - margin.left - margin.right,
+    height = 500-margin.top-margin.bottom;
+
+          
+var svg = d3.select("body").append("svg")
+            .attr("width", width+margin.left +margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+//set up scales and axes
+var x_scale= d3.time.scale()
+                .range([0, width]).nice();//nice() makes end of scale a 'nice' number
+var y_scale = d3.scale.linear()
+                .range([height, 0]).nice();//remember, needs to be 'opposite' for y scale!
+var xAxis = d3.svg.axis()
+                    .scale(x_scale)
+                    .tickSize(-height)
+                    .tickSubdivide(true)
+                    .orient("top");
+                    
+                    
+var yAxis = d3.svg.axis()
+                    .scale(y_scale)
+                    .orient("left");
+                    //.tickFormat(d3.format(".2s"));
+
+d3.json("data/data.json", function(error, data){
+    dataset = data;
+    dataset.forEach(function(d){
+        x_vals.push(Date.parse(d.Date));
+        y_vals.push(d.content.length);
+         });
+        
+        x_scale.domain(d3.extent(x_vals));
+        y_scale.domain([0, d3.max(y_vals)]);
+        
+        mult_to_fit_y = height/d3.max(y_vals);//use this to scale y values in pixels
+
+    barChart();
+});
+
+
+
+function barChart(){
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height+ ")")
+        .call(xAxis);
+      
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+    .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", -50)
+         .attr("x", -height/2)
+         //.attr("dy", "-1em")
+         .style("text-anchor", "start")
+         .text("Length of message");
+        
+    var barWidth = width / x_vals.length
+    console.log("height: " + height);
+    svg.selectAll(".bar")
+        .data(dataset)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d, i){return i*barWidth;})//BUT??? does this mean not tied to date?? doublecheck
+        .attr("width", barWidth)
+        //.attr("y", 480)
+        .attr("y", function(d) {return height- d.content.length*mult_to_fit_y; })
+        .attr("height", function(d) {return height - d.content.length*mult_to_fit_y; });
+      
+    }
+    
+ 
+//chart start data (x axis) off... might need to use the y0, y1 method Jen had used in sample code
+//STILL NEED TO ADD TOOLTIPS!!
+</script>
