@@ -9,6 +9,9 @@
 </head>
 
 <body>
+<!--my lazy 'margin padding'...-->
+<p><br><br><br><br><br><br><br>
+</p>
 
 <div id ="chart"></div>
 
@@ -18,6 +21,26 @@
 var dataset;
 var x_vals=[];
 var y_vals=[];
+var padding;
+var x_min, x_max, total_days;
+var barWidth;
+var direction;
+
+var monthMap = {
+    "Jan":0,
+    "Feb":1, 
+    "Mar":2, 
+    "Apr":3,
+    "May":4, 
+    "Jun":5, 
+    "Jul":6,
+    "Aug":7, 
+    "Sep":8,
+    "Oct":9,
+    "Nov":10,
+    "Dec":11
+}
+
 
 //set up margins
 var margin = {top: 20, right: 20, bottom: 20, left: 200},
@@ -25,7 +48,7 @@ var margin = {top: 20, right: 20, bottom: 20, left: 200},
     height = 500-margin.top-margin.bottom;
 
           
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#chart").append("svg")
             .attr("width", width+margin.left +margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
@@ -38,28 +61,68 @@ var y_scale = d3.scale.linear()
                 .range([height, 0]).nice();//remember, needs to be 'opposite' for y scale!
 var xAxis = d3.svg.axis()
                     .scale(x_scale)
-                    .tickSize(-height)
+                    .tickSize(-height) 
                     .tickSubdivide(true)
-                    .orient("top");
+                    //.ticks(d3.time.month, 1)
+                    .orient("bottom");
                     
                     
 var yAxis = d3.svg.axis()
                     .scale(y_scale)
+                    .tickSize(-width)
+                    .tickSubdivide(true)
                     .orient("left");
                     //.tickFormat(d3.format(".2s"));
+                    
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>Content:</strong><br> <span style='color:grey'>" + d.Date + "<br>From: " + d.From + "<br>" +d.content + "<br>" + d.content.length + "</span>";
+  })
 
+svg.call(tip);
 d3.json("data/data.json", function(error, data){
     dataset = data;
-    dataset.forEach(function(d){
-        x_vals.push(Date.parse(d.Date));
-        y_vals.push(d.content.length);
-         });
-        
-        x_scale.domain(d3.extent(x_vals));
-        y_scale.domain([0, d3.max(y_vals)]);
-        
-        mult_to_fit_y = height/d3.max(y_vals);//use this to scale y values in pixels
+    
+    
+    var anna = "Anna";//friend 1 (the user)
+    var kendall = "Kendall";//friend 2
 
+    dataset.forEach(function(d){
+        if (d.From.indexOf(kendall)>-1){direction = 1;}//will put Kendall's data below [see further for why the '1' will do this-- comes in during barChart() transform
+            else if (d.From.indexOf(anna)>-1){direction = 0;}//will put Anna's data above
+                else {d.content ='';} //don't include bars for emails that weren't from either of us
+        console.log("dir: " + direction + "; From: " + d.From);
+        d.direction = direction;
+        
+        console.log(d.direction);
+        //need to translate the 'date' to an actual date format
+        day= +d.Date.slice(5, 7).trim();
+        month = d.Date.slice(7, 11).trim();
+        for (key in monthMap){if (month==key){month=+monthMap[key];}}
+        year=+d.Date.slice(11, 16).trim();
+        var theDate = new Date(year, month, day);
+        console.log("day: " + day + "; month: " + month + "; year: " + year); console.log(d.Date);
+        d.Date = theDate;
+        console.log(d.Date instanceof Date);// to verify that your date is actually a date
+        x_vals.push(Date.parse(d.Date));
+        //y_vals.push(d.content.length); //original
+        y_vals.push(d.content.length);
+    });
+         
+        console.log(x_vals);
+        padding = 200;
+        x_scale.domain(d3.extent(dataset, function(d) { return d.Date; }));
+        //x_scale.domain(d3.extent(dataset.Date));
+        //y_scale.domain([0, d3.max(y_vals)+padding]);//this is for using only the positive axis
+        y_scale.domain([-d3.max(y_vals)+padding, d3.max(y_vals)+padding]);//this is an attempt to show negative values (balance)
+        
+        mult_to_fit_y = 0.5*height/(d3.max(y_vals)+padding);//use this to scale y values in pixels
+        x_min = d3.min(x_vals);
+        x_max = d3.max(x_vals);
+        total_days = (x_max - x_min)/86400000;//translating from milliseconds to days
+        barWidth = width/total_days;
     barChart();
 });
 
@@ -68,7 +131,7 @@ d3.json("data/data.json", function(error, data){
 function barChart(){
     svg.append("g")
         .attr("class", "x axis")
-        .attr("transform", "translate(0," + height+ ")")
+        .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
       
     svg.append("g")
@@ -81,22 +144,37 @@ function barChart(){
          //.attr("dy", "-1em")
          .style("text-anchor", "start")
          .text("Length of message");
-        
-    var barWidth = width / x_vals.length
+   
+         
+   // var barWidth = width / x_vals.length//can't use this because the length of dataset not necessarily equal to # of days!
     console.log("height: " + height);
     svg.selectAll(".bar")
         .data(dataset)
         .enter().append("rect")
-        .attr("class", "bar")
-        .attr("x", function(d, i){return i*barWidth;})//BUT??? does this mean not tied to date?? doublecheck
+        .attr("class", function (d){if(d.direction ==1){return "bar1";}else{return "bar";}})
+        .attr("x", function(d) {return x_scale(d.Date);})//so happy it works now!! this needed to be tied to the dataset!
+        //.attr("x", function(d,i){return i*barWidth;})//BUT??? does this mean not tied to date?? doublecheck
         .attr("width", barWidth)
         //.attr("y", 480)
-        .attr("y", function(d) {return height- d.content.length*mult_to_fit_y; })
-        .attr("height", function(d) {return height - d.content.length*mult_to_fit_y; });
+        //.attr("y", function(d) {d.content.length*mult_to_fit_y; })
+        .attr("y", function(d) {if (d.direction ==1){d.content.length*mult_to_fit_y; } else if (d.direction ==0) {return height- d.content.length*mult_to_fit_y} })
+        //.attr("height", function(d) {return 2*margin.top + 2*margin.bottom+d.content.length*d.direction*mult_to_fit_y-padding + 120; })
+        .attr("height", function(d) {return 2*margin.top + 2*margin.bottom+d.content.length*mult_to_fit_y-padding + 120;})
+        .attr("transform", function(d) {if (d.direction ==1){return "translate(0," + height/2 + ")";} else{return "translate(0," + -height/2 + ")" }})
+        //.attr("height", function(d) {if((height - d.content.length*mult_to_fit_y)>0){return height - d.content.length*mult_to_fit_y;}else{return 0;} })
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide);
       
     }
     
  
-//chart start data (x axis) off... might need to use the y0, y1 method Jen had used in sample code
 //STILL NEED TO ADD TOOLTIPS!!
+//for tool tips-- for final version, maybe have a link to a new page (open in new window)
+//where you can 
+//see first assignments for ideas on how to implement
+//using jinja templates
+//but before you do that, work on getting the balance of the graphs right (me, kendall, top, bottom)
+//because then you can do keyword searches
+//main issue: dates not matching up with content!!!!
+//and of course the break issue...
 </script>
