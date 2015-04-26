@@ -1,14 +1,15 @@
 body {
   font: 10px sans-serif;
-  background-color: #ABCEFF;
+  background-color: black;
+  color:black;
   
 
 }
 
-svg {
-  background-color: #FFC970;
-  
-
+svg{
+    stroke: grey;
+    fill: white;
+    font-weight: light;
 }
  
 .axis path,
@@ -19,23 +20,23 @@ svg {
 }
 
 .bar1 {
-  fill: #FF3500;
-  stroke: #FF3500;;
+  fill: #00FFB2;
+  stroke: #00FFB2;
 }
 
 .bar{
-    fill:#1678FF;
-    stroke:#1678FF;
+    fill:#FF0074;
+    stroke:#FF0074;
 }
 
 .bar:hover {
-  fill: #003C8F ;
-  stroke: #003C8F ;
+  fill: #FFA879 ;
+  stroke: #FFA879 ;
 }
 
 .bar1:hover {
-  fill: #A72300 ;
-  stroke: #A72300 ;
+  fill: #FFA879 ;
+  stroke: #FFA879 ;
 }
 
 
@@ -44,14 +45,11 @@ svg {
 }
 .x.axis line {
   stroke: none;
+  
 }
 
 .y.axis line {
   stroke: none;
-}
-.rect {
-    fill: blue;
-    stroke: blue;
 }
 
 
@@ -59,8 +57,7 @@ svg {
   line-height: 1;
   font-weight: bold;
   padding: 12px;
-  background: #FFF2A4;
-  color: black;
+  background: white;
   border-radius: 2px;
 }
 
@@ -71,7 +68,8 @@ svg {
   font-size: 10px;
   width: 100%;
   line-height: 1;
-  color: rgba(0, 0, 0, 0.8);
+  color:white;
+  stroke: black;
   content: "\25BC";
   position: absolute;
   text-align: center;
@@ -84,7 +82,7 @@ svg {
   left: 0;
 }
 
-/* Not sure if this will work */
+
 .brush .extent {
   stroke: #fff;
   fill-opacity: .125;
