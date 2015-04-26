@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Anna's Email Visualization</title>
+<link rel="stylesheet" href ="css/sample-d3.css">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+</head>
+
+<body>
+<!--my lazy 'margin padding'...-->
+<p><br><br><br><br><br><br><br>
+</p>
+
+<div id ="chart"></div>
+<div id ="chart2"></div>
+
+</body>
+
+<script type="text/javascript">
+var dataset;
+var x_vals=[];
+var y_vals=[];
+var x_min, x_max, total_days;
+var barWidth;
+var direction;
+
+var monthMap = {
+    "Jan":0,
+    "Feb":1, 
+    "Mar":2, 
+    "Apr":3,
+    "May":4, 
+    "Jun":5, 
+    "Jul":6,
+    "Aug":7, 
+    "Sep":8,
+    "Oct":9,
+    "Nov":10,
+    "Dec":11
+}
+
+
+//set up margins
+var margin = {top: 20, right: 20, bottom: 20, left: 200},
+    width = 960 - margin.left - margin.right,
+    height = 500-margin.top-margin.bottom;
+
+          
+var svg = d3.select("#chart").append("svg")
+            .attr("width", width+margin.left +margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+//set up scales and axes
+var x_scale= d3.time.scale()
+                .range([0, width]).nice();//nice() makes end of scale a 'nice' number
+var y_scale = d3.scale.linear()
+                .range([height, 0]).nice();//remember, needs to be 'opposite' for y scale!
+var xAxis = d3.svg.axis()
+                    .scale(x_scale)
+                    .tickSize(-height) 
+                    .tickSubdivide(true)
+                    .tickFormat(function (d) { return '';})//hides the y tick labels to keep things looking pretty
+                    .orient("bottom");
+                    
+                    
+var yAxis = d3.svg.axis()
+                    .scale(y_scale)
+                    .tickSize(-width)
+                    .tickSubdivide(true)
+                    .tickFormat(function (d) { return '';})//hides the y tick labels to keep things looking pretty
+                    .orient("left");
+                    
+                    
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<span style='color:grey'>" + d.Date.toDateString() + "<br>From: " + d.From + "<br>" + "Subject: " + d.Subject + "<br>" + "Length (characters):" + d.content.length + "</span>";
+  })
+
+svg.call(tip);
+d3.json("data/data.json", function(error, data){
+    dataset = data;
+    
+    
+    var anna = "Anna";//friend 1 (the user)-- change to reflect the right person!
+    var kendall = "Kendall"; //friend 2
+
+    dataset.forEach(function(d){
+        if (d.From.indexOf(kendall)>-1){direction = 1;}//will put Kendall's data below [see further for why the '1' will do this-- comes in during barChart() transform
+            else if (d.From.indexOf(anna)>-1){direction = 0;}//will put Anna's data above
+                else {d.content ='';} //don't include bars for emails that weren't from either of us
+        console.log("dir: " + direction + "; From: " + d.From);
+        d.direction = direction;
+        
+        console.log(d.direction);
+        //need to translate the 'date' to an actual date format
+        day= +d.Date.slice(5, 7).trim();
+        month = d.Date.slice(7, 11).trim();
+        for (key in monthMap){if (month==key){month=+monthMap[key];}}
+        year=+d.Date.slice(11, 16).trim();
+        d.year = year;
+        var theDate = new Date(year, month, day);
+        console.log("day: " + day + "; month: " + month + "; year: " + year); console.log(d.Date);
+        d.Date = theDate;
+        console.log(d.Date instanceof Date);// to verify that your date is actually a date
+        x_vals.push(Date.parse(d.Date));
+        //y_vals.push(d.content.length); //original
+        y_vals.push(d.content.length);
+    });
+         
+        console.log(x_vals);
+        x_scale.domain(d3.extent(dataset, function(d) { return d.Date; }));
+        y_scale.domain([-d3.max(y_vals), d3.max(y_vals)]);//this is an attempt to show negative values (balance)
+        
+        mult_to_fit_y = 0.5*height/(d3.max(y_vals));//use this to scale y values in pixels
+        x_min = d3.min(x_vals);
+        x_max = d3.max(x_vals);
+        total_days = (x_max - x_min)/86400000;//translating from milliseconds to days
+        barWidth = width/total_days;
+    barChart();
+});
+
+
+
+function barChart(){
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+      
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+    .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", -50)
+         .attr("x", -height/2)
+         .style("text-anchor", "start")
+         //.text("Length of message")
+         ;
+   
+         
+   
+    console.log("height: " + height);
+    svg.selectAll(".bar")
+        .data(dataset)
+        .enter().append("rect")
+        .attr("class", function (d){if(d.direction ==1){return "bar1";}else{return "bar";}})//this is literally just to get different colors
+        .attr("x", function(d) {return x_scale(d.Date);})//so happy it works now!! this needed to be tied to the dataset!
+        .attr("width", barWidth)
+        .attr("y", function(d) {if (d.direction ==1){d.content.length*mult_to_fit_y; } else if (d.direction ==0) {return height- d.content.length*mult_to_fit_y} })
+        .attr("height", function(d) {if (d.direction ==1)
+            {return d.content.length*mult_to_fit_y;}
+            else
+            {return d.content.length*mult_to_fit_y;}
+            })
+        .attr("transform", function(d) {if (d.direction ==1){return "translate(0," + height/2 + ")";} else{return "translate(0," + -height/2+ ")" }})
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide);
+      
+    }
+    
+ 
+
+//see first assignments for ideas on how to implement
+//using jinja templates
+
+//because then you can do keyword searches
+
+</script>
