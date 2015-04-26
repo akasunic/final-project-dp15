@@ -123,7 +123,12 @@ messages = []
 while 1:
     msg = mbox.next()
     if msg is None: break
-    messages.append(objectify_message(msg))
+    elif msg['From'][0:4]!="Kend" and msg['From'][0:4]!="Anna":#Don't include messages not sent by Anna or Kendall
+        pass
+    elif msg['To'][0:4]!="Kend" and msg['To'][0:4]!="Anna":#or messages not sent to each other (aka only incldue direct communication between 2 friends)
+        pass
+    else:
+        messages.append(objectify_message(msg))
 
 #To reuse this code, change output location    
 with open('/Users/akasunic/Desktop/DataPipeline/Final Project/final-project-practice/data/data.json', 'w') as outfile:
