@@ -24,7 +24,7 @@ from webapp2_extras import jinja2
 
 #lets get all the email ids
 myEmailId = "senigmatic@gmail.com"
-myFriends = ["himangshumail@gmail.com","shilpi.tweety@gmail.com","avinashbahirvani@gmail.com"]
+myFriends = ["hxxxxxxxxxxx@gmail.com","sxxxxx.xxxxxx@gmail.com","avixxxxxxxx@gmail.com"]
 baseFolder = "E:\\work\\course\\Data Pipeline\\Project 2\\data\\"
 months={'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
 minYear = 2016
