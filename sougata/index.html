@@ -1,0 +1,581 @@
+<HTML>
+<HEAD><TITLE></TITLE>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+
+</HEAD>
+<BODY>
+<form name="form1" action="" method="POST">Get all emails with the word:<input name="searchWord" value="{{searchWord}}"/>&nbsp;&nbsp<input type="submit" value="Get Emails"></form>
+<meta charset="utf-8">
+<style>
+
+.bar {
+  fill: steelblue;
+}
+
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+</style>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="stylesheets/d3.tip.js"></script>
+<script>
+var fre = {{frequency|safe}}
+//console.log(fre)
+var dataObj=[];
+var toSend = {{toSend|safe}};
+var content1 = {{content|safe}};
+console.log(content1);
+
+var margin = {top: 20, right: 20, bottom: 50, left: 40},
+    width = 2960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x0 = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+var x1 = d3.scale.ordinal();
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+
+  	console.log(d.name);
+  	console.log(Object.keys(content1));
+  	for (var key in content1)
+  	{
+  		if(key.substring(0,key.indexOf("_")+3)==d.name)
+  		{
+  			console.log(d.monthYear)
+  			console.log(content1[key][d.monthYear])
+  			return content1[key][d.monthYear];
+  		}
+  	}
+
+  })
+var color = d3.scale.ordinal()
+    .range(["#3333bb", "#3399bb", "#bb3333", "#bb9933","#AAaaaa","#222222"]);
+
+var xAxis = d3.svg.axis()
+    .scale(x0)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickFormat(d3.format(".2s"));
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.call(tip);
+
+d3.csv("data/grouped.csv", function(error, data) {
+  data=toSend;
+  var ageNames = d3.keys(data[0]).filter(function(key) { return key !== "monthYear"; });
+
+  data.forEach(function(d) {
+  	    d.ages = ageNames.map(function(name) { return {name: name, value: +d[name],monthYear:d.monthYear}; });
+  });
+
+console.log(data);
+  x0.domain(data.map(function(d) { return d.monthYear; }));
+  x1.domain(ageNames).rangeRoundBands([0, x0.rangeBand()]);
+  y.domain([0, d3.max(data, function(d) { return d3.max(d.ages, function(d) { return d.value; }); })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+            .selectAll("text")
+	              .style("text-anchor", "end")
+	              .attr("dx", function(d){return "-.8em"})
+	              .attr("dy", ".15em")
+	              .attr("transform", function(d) {
+	                  return "rotate(-65)"
+                });;
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Number of emails");
+
+  var state = svg.selectAll(".monthYear")
+      .data(data)
+    .enter().append("g")
+      .attr("class", "g")
+      .attr("transform", function(d) { return "translate(" + x0(d.monthYear) + ",0)"; });
+
+  state.selectAll("rect")
+      .data(function(d) { return d.ages; })
+    .enter().append("rect")
+      .attr("width", x1.rangeBand())
+      .attr("x", function(d) { return x1(d.name); })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); })
+      .style("fill", function(d) { return color(d.name); })
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide);
+
+  var legend = svg.selectAll(".legend")
+      .data(ageNames.slice().reverse())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+  legend.append("rect")
+      .attr("x", width - 18)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", color);
+
+  legend.append("text")
+      .attr("x", width - 24)
+      .attr("y", 9)
+      .attr("dy", ".35em")
+      .style("text-anchor", "end")
+      .text(function(d) { return d; });
+
+});
+
+
+</script>
+
+<!--!DOCTYPE html>
+<html>
+<head>
+  <link href="stylesheets/tabs.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="d3/d3.js"></script>
+  <script src="d3/d3-timeline.js"></script>
+  <meta charset="UTF-8">
+  <title>Data Pipeline Project Byte 3 -- Visualization</title>
+
+  <style>
+
+path {
+  fill: #ccc;
+  stroke: #333;
+  stroke-width: 1.5px;
+  transition: fill 250ms linear;
+  transition-delay: 150ms;
+}
+
+path:hover {
+  fill: #999;
+  stroke: #000;
+  transition-delay: 0;
+}
+
+
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: black;
+      shape-rendering: crispEdges;
+    }
+    .axis text {
+      font-family: sans-serif;
+      font-size: 10px;
+    }
+    .timeline-label {
+      font-family: sans-serif;
+      font-size: 12px;
+    }
+    #timeline2 .axis {
+      transform: translate(0px,30px);
+      -ms-transform: translate(0px,30px); /* IE 9 */
+      -webkit-transform: translate(0px,30px); /* Safari and Chrome */
+      -o-transform: translate(0px,30px); /* Opera */
+      -moz-transform: translate(0px,30px); /* Firefox */
+    }
+    .coloredDiv {
+      height:20px; width:20px; float:left;
+    }
+
+</style>
+</head>
+ <body style="background:#333">
+<center>
+<div id="bodyDiv" style="width:960px;height:1500px;background:#fff">
+	<h3>Communication Timeline</h3>
+	<img src="data\boy.png" alt="Boy" height="142" width="142"><br>
+
+	<img src="data\girl.png" alt="Girl" height="142" width="182">
+
+	<div>
+	    <h3>A simple timeline</h3>
+	    <div id="timeline1"></div>
+	  </div>
+	  <div>
+	    <h3>It works with circles too</h3>
+	    <div id="timeline2"></div>
+	  </div>
+	  <div>
+	    <h3>A stacked timeline with hover, click, and scroll events</h3>
+	    <div id="timeline3"></div>
+	    <div id="hoverRes">
+	      <div class="coloredDiv"></div>
+	      <div id="name"></div>
+	      <div id="scrolled_date"></div>
+	    </div>
+	  </div>
+	  <div>
+	    <h3>We can also use icons</h3>
+	    <div id="timeline5"></div>
+	  </div>
+
+	  <div>
+	    <h3>We can change colors and put labels</h3>
+	    <div id="timeline6"></div>
+	  </div>
+
+	  <div>
+	    <h3>We can also rotate tick mark labels</h3>
+	    <div id="timeline7"></div>
+	  </div>
+
+	  <div>
+	    <h3>A timeline with colors mapped from the data</h3>
+	    <div id="timelineColors"></div>
+	  </div>
+
+	  <div>
+	    <h3>A timeline with relative timepoints</h3>
+	    <div width="100%" id="timelineRelativeTime"></div>
+  </div>
+
+
+
+	  <script type="text/javascript">
+	    window.onload = function() {
+
+
+	    var data= [
+		  {time: 'Jan. 1, 2012 13:00', name:"test", value:2},
+		  {time: 'Feb. 2, 2012 9:00', name:"test", value:2},
+		  {time: 'Jan. 3, 2012 14:00', name:"test", value:2},
+		  {time: 'Jan. 1, 2012 12:30', name:"test", value:2},
+		  {time: 'Jan. 3, 2012 1:00', name:"test", value:2},
+		  {time: 'Jan. 3, 2012 1:10', name:"test", value:2},
+		  {time: 'Jan. 3, 2012 1:20', name:"test", value:2},
+		  {time: 'Jan. 3, 2012 2:00', name:"test", value:2},
+		  {time: 'Jan. 1, 2012 3:00', name:"test", value:2},
+];
+
+		var data11 = [{time:'2011-09',value: 2},{time: '2006-09',value: 2},{time: '2011-02',value: 1},{time: '2011-03',value: 1},{time: '2014-01',value: 2},{time: '2011-04',value: 2},{time: '2011-05',value: 2},{time: '2010-07',value: 7},{time: '2010-06',value: 2},{time: '2012-10',value: 1},{time: '2012-11',value: 1},{time: '2012-12',value: 1},{time: '2013-02',value: 3},{time: '2008-08',value: 1},{time: '2008-09',value: 1},{time: '2007-01',value: 1},{time: '2010-12',value: 1},{time: '2007-03',value: 4},{time: '2008-03',value: 2},{time: '2008-04',value: 3},{time: '2008-05',value: 1},{time: '2008-06',value: 1},{time: '2007-06',value: 1},{time: '2009-06',value: 1},{time: '2007-05',value: 4},{time: '2007-09',value: 1},{time: '2015-04',value: 1},{time: '2007-08',value: 2},{time: '2014-12',value: 1},{time: '2011-10',value: 1},{time: '2007-04',value: 3},{time: '2012-09',value: 1},{time: '2007-12',value: 11},{time: '2007-10',value: 4},{time: '2007-11',value: 1},{time: '2012-02',value: 5},{time: '2012-07',value: 1},{time: '2013-12',value: 1},{time: '2012-05',value: 1},{time: '2010-11',value: 1},{time: '2013-05',value: 3},{time: '2008-12',value: 1},{time: '2008-10',value: 1},{time: '2009-10',value: 1},{time: '2008-01',value: 4}]
+
+		var data = []
+		for(ii=2006;ii<2016;ii++)
+			for(jj=1;jj<=12;jj++)
+			{
+				data1={}
+				if(jj<10)
+					data[ii+"-0"+jj]=0
+				else
+					data[ii+"-"+jj]=0
+				//data1['time']=ii+"-"+jj
+				//data1['value']=0
+				data.push(data1);
+			}
+
+		for(data111=0;data111<data11.length;data111++)
+		{
+			datac = data11[data111]
+			data[datac.time] = datac.value
+		}
+
+		console.log(data)
+
+var dateRange = d3.extent(data, function(d) { return new Date(d.time); });
+console.log("Data range", dateRange); // This will output your data's time range
+
+// This will compute time bins
+var binner = d3.time.scale();
+
+// Pick the interval I want to bin on
+var interval = d3.time.day; // Use hour, or minute, etc.
+
+// I will compute the number of the time intervals I want
+var allIntervals = interval.range(interval.floor(dateRange[0]), interval.ceil(dateRange[1]));
+console.log(interval.floor(dateRange[0]));
+console.log(interval.ceil(dateRange[1]));
+console.log("Intervals", allIntervals); // This will output an array of all the days/hours/whatever between min and max date
+var x = d3.time.scale().domain([interval.floor(dateRange[0]), interval.ceil(dateRange[1])]).range([0, width]);
+// Input domain mapped to output range
+binner.domain([allIntervals[0], allIntervals[allIntervals.length - 1]]);
+binner.range([0,allIntervals.length - 1]);
+
+// Make sure we only output integers - important because we will fill an array
+binner.interpolate(d3.interpolateRound);
+
+// Empty histogram
+var hist = [];
+for(var i=0; i < allIntervals.length; i++) hist[i] = 0;
+
+data.forEach(function(d) {
+  // Compute the hour index
+  var tid = binner(interval.floor(new Date(d.time)));
+  console.log("Map " + d.time + " to " + tid);
+
+  if(!hist[tid]) {
+    hist[tid] = 1;
+  }
+  else {
+    hist[tid]++;
+  }
+});
+
+// Here is the histogram.
+console.log("Hist:",hist);
+
+
+var formatCount = d3.format(",.0f");
+
+var margin = {top: 10, right: 30, bottom: 30, left: 30},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.scale.linear()
+    .domain([0, 1])
+    .range([0, width]);
+
+// Generate a histogram using twenty uniformly-spaced bins.
+var data = d3.layout.histogram()
+    .bins(x.ticks(allIntervals.length/10 - 1))
+    (hist);
+
+
+   var y = d3.scale.linear()
+       .domain([0, d3.max(data, function(d) { return d.y; })])
+       .range([height, 0]);
+
+   var xAxis = d3.svg.axis()
+       .scale(x)
+       .orient("bottom");
+
+   var svg = d3.select("body").append("svg")
+       .attr("width", width + margin.left + margin.right)
+       .attr("height", height + margin.top + margin.bottom)
+     .append("g")
+       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+   var bar = svg.selectAll(".bar")
+       .data(data)
+     .enter().append("g")
+       .attr("class", "bar")
+       .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+
+   bar.append("rect")
+       .attr("x", 1)
+       .attr("width", x(data[0].dx) - 1)
+       .attr("height", function(d) { return height - y(d.y); });
+
+   bar.append("text")
+       .attr("dy", ".75em")
+       .attr("y", 6)
+       .attr("x", x(data[0].dx) / 2)
+       .attr("text-anchor", "middle")
+       .text(function(d) { return formatCount(d.y); });
+
+   svg.append("g")
+       .attr("class", "x axis")
+       .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+
+	      var testData = [
+	        {times: [{"starting_time": 1355752800000, "ending_time": 1355759900000}, {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
+	        {times: [{"starting_time": 1355759910000, "ending_time": 1355761900000}, ]},
+	        {times: [{"starting_time": 1355761910000, "ending_time": 1355763910000}]},
+	      ];
+	      var labelTestData = [
+	        {label: "person a", times: [{"starting_time": 1355752800000, "ending_time": 1355759900000}, {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
+	        {label: "person b", times: [{"starting_time": 1355759910000, "ending_time": 1355761900000}, ]},
+	        {label: "person c", times: [{"starting_time": 1355761910000, "ending_time": 1355763910000}]},
+	      ];
+	      var iconTestData = [
+	        {icon: "data/boy.png", times: [{"starting_time": 1355752800000, "ending_time": 1355759900000}, {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
+	        {icon: "data/girl.png", times: [{"starting_time": 1355759910000, "ending_time": 1355761900000}, ]},
+
+	      ];
+	      var labelColorTestData = [
+	        {label: "person a", times: [{"color":"green", "label":"Weeee", "starting_time": 1355752800000, "ending_time": 1355759900000}, {"color":"blue", "label":"Weeee", "starting_time": 1355767900000, "ending_time": 1355774400000}]},
+	        {label: "person b", times: [{"color":"pink", "label":"Weeee", "starting_time": 1355759910000, "ending_time": 1355761900000}, ]},
+	        {label: "person c", times: [{"color":"yellow", "label":"Weeee", "starting_time": 1355761910000, "ending_time": 1355763910000}]},
+	      ];
+	      var testDataWithColor = [
+	        {label: "fruit 1", fruit: "orange", times: [
+	          {"starting_time": 1355759910000, "ending_time": 1355761900000}]},
+	        {label: "fruit 2", fruit: "apple", times: [
+	          {"starting_time": 1355752800000, "ending_time": 1355759900000},
+	          {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
+	        {label: "fruit3", fruit: "lemon", times: [
+	          {"starting_time": 1355761910000, "ending_time": 1355763910000}]},
+	        ];
+	      var testDataRelative = [
+	        {times: [{"starting_time": 1355752800000, "ending_time": 1355759900000}, {"starting_time": 1355767900000, "ending_time": 1355774400000}]},
+	        {times: [{"starting_time": 1355759910000, "ending_time": 1355761900000}]},
+	        {times: [{"starting_time": 1355761910000, "ending_time": 1355763910000}]},
+	      ];
+	      var width = 500;
+	      function timelineRect() {
+	        var chart = d3.timeline();
+	        var svg = d3.select("#timeline1").append("svg").attr("width", width)
+	          .datum(testData).call(chart);
+	      }
+	      function timelineCircle() {
+	        var chart = d3.timeline()
+	          .tickFormat( //
+	            {format: d3.time.format("%I %p"),
+	            tickTime: d3.time.hours,
+	            tickInterval: 1,
+	            tickSize: 30})
+	          .display("circle"); // toggle between rectangles and circles
+	        var svg = d3.select("#timeline2").append("svg").attr("width", width)
+	          .datum(testData).call(chart);
+	      }
+	      function timelineHover() {
+	        var chart = d3.timeline()
+	          .width(width*4)
+	          .stack()
+	          .margin({left:70, right:30, top:0, bottom:0})
+	          .hover(function (d, i, datum) {
+	          // d is the current rendering object
+	          // i is the index during d3 rendering
+	          // datum is the id object
+	            var div = $('#hoverRes');
+	            var colors = chart.colors();
+	            div.find('.coloredDiv').css('background-color', colors(i))
+	            div.find('#name').text(datum.label);
+	          })
+	          .click(function (d, i, datum) {
+	            alert(datum.label);
+	          })
+	          .scroll(function (x, scale) {
+	            $("#scrolled_date").text(scale.invert(x) + " to " + scale.invert(x+width));
+	          });
+	        var svg = d3.select("#timeline3").append("svg").attr("width", width)
+	          .datum(labelTestData).call(chart);
+	      }
+	      function timelineStackedIcons() {
+	        var chart = d3.timeline()
+	          .beginning(1355752800000) // we can optionally add beginning and ending times to speed up rendering a little
+	          .ending(1355774400000)
+	          .stack() // toggles graph stacking
+	          .margin({left:70, right:30, top:0, bottom:0})
+	          ;
+	        var svg = d3.select("#timeline5").append("svg").attr("width", width)
+	          .datum(iconTestData).call(chart);
+	      }
+	      function timelineLabelColor() {
+	        var chart = d3.timeline()
+	          .beginning(1355752800000) // we can optionally add beginning and ending times to speed up rendering a little
+	          .ending(1355774400000)
+	          .stack() // toggles graph stacking
+	          .margin({left:70, right:30, top:0, bottom:0})
+	          ;
+	        var svg = d3.select("#timeline6").append("svg").attr("width", width)
+	          .datum(labelColorTestData).call(chart);
+	      }
+	      function timelineRotatedTicks() {
+	        var chart = d3.timeline()
+	          .rotateTicks(45);
+	        var svg = d3.select("#timeline7").append("svg").attr("width", width)
+	          .datum(testData).call(chart);
+	      }
+	      function timelineRectColors() {
+	        var colorScale = d3.scale.ordinal().range(['#6b0000','#ef9b0f','#ffee00'])
+	            .domain(['apple','orange','lemon']);
+	        var chart = d3.timeline()
+	            .colors( colorScale )
+	            .colorProperty('fruit');
+	        var svg = d3.select("#timelineColors").append("svg").attr("width", width)
+	          .datum(testDataWithColor).call(chart);
+	      }
+	      function timelineRelativeTime() {
+	        //This solution is for relative time is from
+	        //http://stackoverflow.com/questions/11286872/how-do-i-make-a-custom-axis-formatter-for-hours-minutes-in-d3-js
+	        var chart = d3.timeline()
+	          .relativeTime()
+	          .tickFormat({
+	            format: function(d) { return d3.time.format("%H:%M")(d) },
+	            tickTime: d3.time.minutes,
+	            tickInterval: 30,
+	            tickSize: 15,
+	          });
+	        var svg = d3.select("#timelineRelativeTime").append("svg").attr("width", width)
+	          .datum(testDataRelative).call(chart);
+	          console.log(testDataRelative);
+	      }
+	      timelineRect();
+	      timelineCircle();
+	      timelineHover();
+	      timelineStackedIcons();
+	      timelineLabelColor();
+	      timelineRotatedTicks();
+	      timelineRectColors();
+	      timelineRelativeTime();
+	    }
+  </script>
+
+</div>
+    </center>
+ </body>
+</html-->
+</BODY>
+</HTML>
