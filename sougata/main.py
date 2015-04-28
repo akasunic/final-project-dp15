@@ -23,23 +23,29 @@ import time
 from webapp2_extras import jinja2
 
 #lets get all the email ids
-myEmailId = "senigmatic@gmail.com"
-myFriends = ["himangshumail@gmail.com","shilpi.tweety@gmail.com","avinashbahirvani@gmail.com"]
-baseFolder = "E:\\work\\course\\Data Pipeline\\Project 2\\data\\"
+myEmailId = "se*********@gmail.com"
+myFriends = ["hi**********@gmail.com","s**********@gmail.com","av********@gmail.com"] ''' Enter your friend's email addresses'''
+baseFolder = "data/" '''Store all data there'''
 months={'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
 minYear = 2016
 maxYear=1900
 
+'''global variables which will be used to send data to html '''
 storeMsg = {}
 storeCount={}
 storeContent = {}
 dataArranged=[]
 toWrite="monthYear"
 toSendArray = []
+zoomableTreeMap = {"name":"emails","children":[]}
+zoomableTree1 = {}
 
 def populateData():
-	global toSendArray
+	'''This method initializes the arrays'''
+	global toSendArray,zoomableTreeMap
 	toSendArray = []
+	zoomableTreeMap = {"name":"emails","children":[]}
+	
 	logging.info(toSendArray)
 	del toSendArray[:]
 	for emailId in myFriends:
@@ -51,6 +57,7 @@ def populateData():
 #	logging.info(storeMsg)
 	
 def getFrequency(word=""):
+	'''Given a word, this method will find emails with the word'''
 	global minYear,maxYear
 	with open(baseFolder+'dataVis.json') as data_file:    
 		data = json.load(data_file)
@@ -96,11 +103,40 @@ def getFrequency(word=""):
 							storeContent["From_"+person.split('@')[0]][mod_date]=str(content.encode("utf-8"))[:50]+"...<HR>"
 						else:
 							storeContent["From_"+person.split('@')[0]][mod_date]="..."+str(content.encode("utf-8"))[str(content.encode("utf-8")).index(word)-25:str(content.encode("utf-8")).index(word)+25]+"...<HR>"
-
-					if mod_date == "2006-04":
-						logging.info(content)
 					
-
+					logging.info(zoomableTreeMap["children"])
+					
+					isPresent = False
+					tempChild = {}
+					for zoomChild in zoomableTreeMap["children"]:
+						if ("From_"+person.split('@')[0]) in zoomChild["name"]:
+							tempChild = zoomChild["children"]
+							isPresent=True
+						#else:
+						#	mapper = {"name":("From_"+person.split('@')[0]),"children":[{"name":mod_dateSplit[3].encode("utf-8"),"size":1}]}
+						#	zoomableTreeMap["children"].append(mapper);
+						#	logging.info("added")
+					
+					if isPresent is False:
+						mapper = {"name":("From_"+person.split('@')[0]),"children":[{"name":mod_dateSplit[3].encode("utf-8"),"size":1}]}
+						zoomableTreeMap["children"].append(mapper);
+						logging.info("added")
+					else:
+						for zoomYear in tempChild: 
+							logging.info(zoomYear)
+							
+							
+							
+					if ("From_"+person.split('@')[0]) in zoomableTree1:
+						if mod_dateSplit[3].encode("utf-8") in zoomableTree1[("From_"+person.split('@')[0])]:
+							zoomableTree1[("From_"+person.split('@')[0])][mod_dateSplit[3].encode("utf-8")] = zoomableTree1[("From_"+person.split('@')[0])][mod_dateSplit[3].encode("utf-8")] +1
+						else:
+							zoomableTree1[("From_"+person.split('@')[0])][mod_dateSplit[3].encode("utf-8")] = 1
+					else:
+						zoomableTree1["From_"+person.split('@')[0]]={}
+						zoomableTree1["From_"+person.split('@')[0]][mod_dateSplit[3].encode("utf-8")]=1
+						
+					logging.info(zoomableTree1)
 					storeCount["From_"+person.split('@')[0]]=storeCount["From_"+person.split('@')[0]]+1
 
 			if myEmailId in currData["From"]:
@@ -122,11 +158,21 @@ def getFrequency(word=""):
 							else:
 								storeContent["To_"+person.split('@')[0]][mod_date]="..."+str(content.encode("utf-8"))[str(content.encode("utf-8")).index(word)-25:str(content.encode("utf-8")).index(word)+25]+"...<HR>"
 
-
+						
+						if ("To_"+person.split('@')[0]) in zoomableTree1:
+							if mod_dateSplit[3].encode("utf-8") in zoomableTree1[("To_"+person.split('@')[0])]:
+								zoomableTree1[("To_"+person.split('@')[0])][mod_dateSplit[3].encode("utf-8")] = zoomableTree1[("To_"+person.split('@')[0])][mod_dateSplit[3].encode("utf-8")] +1
+							else:
+								zoomableTree1[("To_"+person.split('@')[0])][mod_dateSplit[3].encode("utf-8")] = 1
+						else:
+							zoomableTree1["To_"+person.split('@')[0]]={}
+							zoomableTree1["To_"+person.split('@')[0]][mod_dateSplit[3].encode("utf-8")]=1
+						
+						
 			 			storeCount["To_"+person.split('@')[0]]=storeCount["To_"+person.split('@')[0]]+1
 			#logging.info(storeContent)
 		except Exception as detail:
-			#logging.info(detail)	
+			logging.info(detail)	
 			continue
 #	logging.info(storeMsg)
 #	logging.info(storeCount)
@@ -201,7 +247,26 @@ def toSend():
 				toPush[splitHead[dataS]] = splitData[dataS]#"-"+splitData[dataS]
 		#toPush['ages']=ages
 		toSendArray.append(toPush)
+
+def createTreeMap():
+	global zoomableTreeMap
+	tempNameArray = []
+	for name in zoomableTree1:
+		tempName = {}
+		tempSizeArray = []
+		for years in zoomableTree1[name]:
+			tempSize = {}
+			tempSize["name"] = years
+			tempSize["size"] = zoomableTree1[name][years]
+			tempSizeArray.append(tempSize)
+		tempName["name"] = name
+		tempName["children"] = tempSizeArray
+		tempNameArray.append(tempName)
 	
+	logging.info(tempNameArray)
+	zoomableTreeMap["children"] = 	tempNameArray
+		
+			
 
 class BaseHandler(webapp2.RequestHandler):
 
@@ -231,8 +296,9 @@ class MainHandler(BaseHandler):
     	tempList = {}
     	tempList['toWrite'] = toWrite
     	toWrite1.append(tempList)
+    	createTreeMap()
     	
-    	context = {"frequency":dataArranged,"toWrite":toWrite1,"toSend":toSendArray,"content":storeContent}
+    	context = {"frequency":dataArranged,"toWrite":toWrite1,"toSend":toSendArray,"content":storeContent,"zoomableTreeMap":zoomableTreeMap}
     	logging.info(context)
 
         self.render_response('index.html', **context)
@@ -251,8 +317,10 @@ class MainHandler(BaseHandler):
     	populateData()
     	getFrequency(word)
     	fillMissingDates()
+    	createTreeMap()
     	toSend()
-    	context = {"frequency":dataArranged,"toSend":toSendArray,"content":storeContent}
+    	
+    	context = {"frequency":dataArranged,"toSend":toSendArray,"content":storeContent,"zoomableTreeMap":zoomableTreeMap}
 	logging.info(context)
         self.render_response('index.html', **context)
 
