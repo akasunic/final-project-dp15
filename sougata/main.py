@@ -23,9 +23,15 @@ import time
 from webapp2_extras import jinja2
 
 #lets get all the email ids
+<<<<<<< HEAD
 myEmailId = "se*********@gmail.com"
 myFriends = ["hi**********@gmail.com","s**********@gmail.com","av********@gmail.com"] ''' Enter your friend's email addresses'''
 baseFolder = "data/" '''Store all data there'''
+=======
+myEmailId = "senigmatic@gmail.com"
+myFriends = ["hxxxxxxxxxxx@gmail.com","sxxxxx.xxxxxx@gmail.com","avixxxxxxxx@gmail.com"]
+baseFolder = "E:\\work\\course\\Data Pipeline\\Project 2\\data\\"
+>>>>>>> 542147e32b1fe0c5680ae01ef47e043991c31096
 months={'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
 minYear = 2016
 maxYear=1900
