@@ -3,7 +3,7 @@
 THIS IS A WORK IN PROGRESS! 
 
 This repo is meant to provide code that can be easily reused and modified to create sites similar to:
-see-mail.appspot.com
+http://see-mail.appspot.com
 
 Files have been commented, and some have
 
