@@ -8,7 +8,10 @@ see-mail.appspot.com
 Files have been commented, and some have
 
 Where to start: 
-1) Check out our website! see-mail.appspot.com. Give us feedback, or try our code first and give us feedback later (or do both!).
+
+1) Check out our website! 
+http://see-mail.appspot.com. 
+Give us feedback, or try our code first and give us feedback later (or do both!).
 
 2) This project is set up for those who use Gmail for carrying out personal interactions.
 Choose a relationship or set of relationships conducted over email you want to explore (suggested: at least a 1 year relationship). 
