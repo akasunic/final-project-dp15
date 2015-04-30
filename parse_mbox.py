@@ -9,12 +9,31 @@ import email
 import json
 from BeautifulSoup import BeautifulStoneSoup
 
-#To reuse this code, change the file path below to point to your mbox file
-MBOX = '/Users/akasunic/Desktop/DataPipeline/Final Project/Takeout 2/Mail/Kendall.mbox'
+#------------USER INPUT-- this is where you put in your own personal data!
+
+#Friend1 and Friend 2 are string t
+#that are the beginning part of the name of the two friends in the mbox file,
+#as they appear in email
+#For example: Friend1 = 'Randolph' and Friend2 = 'Gerald'
+Friend1 = ''
+Friend2 = ''
+
+#Set the file path to point to your mbox file on your local machine
+#For example: MBOX ='/Users/you/Desktop/myMail.mbox'
+MBOX = ''
+
+#Set to the file path where you want your output json file
+#Ultimately, it should belong in the the data folder of your Google Appspot
+#For example: output = '/Users/you/Desktop/your-see-mail/data/data.json'
+output = ''
+ 
+ #----------------------------------------------------------
+
+#Now here's the code. You may want to modify certain parts for your individual data. 
 
 #email content text is super messy! this function uses some rules to clean it up.
 #only keep the most recent thread to avoid duplication of emails
-#most email say, "On [date] [person] wrote:", so here we partition by wrote
+#most email say, "On [date] [person] wrote:", so here we partition by 'wrote:'
 #and keep just the first part
 def html_convert(text):
     
@@ -120,16 +139,17 @@ mbox = mailbox.UnixMailbox(open(MBOX, 'rb'), email.message_from_file)
 
 messages = []
 
+
 while 1:
     msg = mbox.next()
     if msg is None: break
-    elif msg['From'][0:4]!="Kend" and msg['From'][0:4]!="Anna":#Don't include messages not sent by Anna or Kendall
+    elif msg['From'][0:len(Friend1)+1]!=Friend1 and msg['From'][0:len(Friend2)+1]!=Friend2:#Don't include messages not sent by Anna or Kendall
         pass
-    elif msg['To'][0:4]!="Kend" and msg['To'][0:4]!="Anna":#or messages not sent to each other (aka only incldue direct communication between 2 friends)
+    elif msg['To'][0:len(Friend1)+1]!=Friend1 and msg['To'][0:len(Friend2)+1]!=Friend2:#or messages not sent to each other (aka only incldue direct communication between 2 friends)
         pass
     else:
         messages.append(objectify_message(msg))
 
-#To reuse this code, change output location    
-with open('/Users/akasunic/Desktop/DataPipeline/Final Project/final-project-practice/data/data.json', 'w') as outfile:
+   
+with open(output, 'w') as outfile:
     json.dump(messages, outfile, indent=1)

@@ -1,9 +1,13 @@
 body {
-  font: 10px sans-serif;
+  
   background-color: black;
   color:black;
   
 
+}
+
+audio{
+    width:870px;
 }
 
 svg{
@@ -18,6 +22,29 @@ svg{
   stroke: none;
   shape-rendering: crispEdges;
 }
+
+.keybar1 {
+  fill: #269BF4;
+  stroke: #269BF4;
+}
+
+.keybar{
+    fill:#FE192A;
+    stroke:#FE192A;
+}
+
+.keybar:hover {
+  fill: #FFDB19 ;
+  stroke: #FFDB19 ;
+}
+
+.keybar1:hover {
+  fill: #FFDB19 ;
+  stroke: #FFDB19 ;
+}
+
+
+
 
 .bar1 {
   fill: #00FFB2;

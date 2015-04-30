@@ -1,25 +1,88 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Anna's Email Visualization</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flatmate Friends</title>
+
+<!-- Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href ="css/sample-d3.css">
-<script src="d3/d3.v3.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 
 </head>
 
 <body>
+
+<!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">See-mail</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="/about">About</a><!--intro to project, tools used, basic summary of motivation, etc.-->
+                    </li>
+        
+                    <li>
+                        <a href="/">3 Friendships</a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/akasunic/final-project-dp15">Github</a>
+                    </li>
+                    <li>
+                        <a href="/resources">Recommended Resources</a>
+                    </li>
+                    <li>
+                        <a href=#>Give Us Feedback!</a>
+                    </li>
+                    
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+
 <!--my lazy 'margin padding'...-->
-<form method="POST" action="search_term"> Enter a search term: 
-<input type="text" name="search_term" id="search_term" value='{{search_term}}'>
-<input type="submit" value="Filter" ></form>
+<br><br><br><br>
 
-<p><br><br><br><br><br><br><br>
+<div class="container">
+<h1 style="color:white;text-align:center">Length and Frequency of Emails over Time</h1><br><br>
+<div class="span7 text-center"><a href="/friend1" class="btn btn-default" role="button">Replay Intro Video</a>
+<a href="/friend1-keywords" class="btn btn-default" role="button">Tracking Enthusiasm over Time!</a></div>
+</div>
+<br>
+<div class="container">
+<p style="color:white;text-align:center">Note: some browsers (e.g. Chrome) may be unable to play the following song.</p>
+<audio controls>
+  <source src="data/frequency_song.mp3" type="audio/mpeg" width=960px>
+  Your browser does not support the audio tag.
+</audio>
 
-</p>
 <div id ="chart"></div>
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="js/bootstrap.min.js"></script>
 
 </body>
+</html>
 
 <script type="text/javascript">
 var dataset;
@@ -51,6 +114,7 @@ var margin = {top: 20, right: 80, bottom: 180, left: 20},
     width = 960 - margin.left - margin.right,
     height = 500-margin.top-margin.bottom,
     height2 = 500 - margin2.top - margin2.bottom;
+    
 
           
 var svg = d3.select("#chart").append("svg")
@@ -118,28 +182,23 @@ var tip = d3.tip()
   })
 svg.call(tip);
 
-
 d3.json("data/data.json", function(error, data){
     dataset = data;
     
     
-    var anna = "Anna";//friend 1 (the user)-- change to reflect the right person!
-    var kendall = "Kendall"; //friend 2
+    var friend1 = "friend1";//friend 1 (the user)-- change to reflect the right person!
+    var friend2 = "friend2"; //friend 2
     
     
 
     dataset.forEach(function(d){
-        if (d.From.indexOf(kendall)>-1){direction = 1;}//will put Kendall's data below [see further for why the '1' will do this-- comes in during barChart() transform
-            else if (d.From.indexOf(anna)>-1){direction = 0;}//will put Anna's data above
+        if (d.From.indexOf(friend2)>-1){direction = 1;}//will put friend2's data below [see further for why the '1' will do this-- comes in during barChart() transform
+            else if (d.From.indexOf(friend1)>-1){direction = 0;}//will put friend1's data above
                 else {d.content ='';} //don't include bars for emails that weren't from either of us
-
+        console.log("dir: " + direction + "; From: " + d.From);
         d.direction = direction;
-        if (d.content.toLowerCase().indexOf('{{search_term}}')>-1){
-            d.content = Array(d.content.toLowerCase().split('{{search_term}}').length-1).join("a");
-        }
-        else {d.content = '';}
         
-  
+        console.log(d.direction);
         //need to translate the 'date' to an actual date format
         day= +d.Date.slice(5, 7).trim();
         month = d.Date.slice(7, 11).trim();
@@ -147,14 +206,15 @@ d3.json("data/data.json", function(error, data){
         year=+d.Date.slice(11, 16).trim();
         d.year = year;
         var theDate = new Date(year, month, day);
+        console.log("day: " + day + "; month: " + month + "; year: " + year); console.log(d.Date);
         d.Date = theDate;
-        
+        console.log(d.Date instanceof Date);// to verify that your date is actually a date
         x_vals.push(Date.parse(d.Date));
         //y_vals.push(d.content.length); //original
         y_vals.push(d.content.length);
     });
          
-        
+        console.log(x_vals);
         x_scale.domain(d3.extent(dataset, function(d) { return d.Date; }));
         y_scale.domain([-d3.max(y_vals), d3.max(y_vals)]);//this is an attempt to show negative values (balance)
         x2.domain(x_scale.domain());
@@ -162,22 +222,21 @@ d3.json("data/data.json", function(error, data){
         
         
         mult_to_fit_y = 0.5*height/(d3.max(y_vals));//use this to scale y values in pixels
-        mult2 = 200000000*0.5*height2/(x2.domain().slice(-1)[0]);
+        mult2 = 0.5*height2/(y2.domain().slice(-1)[0]);
         x_min = d3.min(x_vals);
         x_max = d3.max(x_vals);
         total_days = (x_max - x_min)/86400000;//translating from milliseconds to days
         barWidth = width/total_days;
         
         x_min2 = x2.domain()[0];
-        
+        console.log("xmin2: " + x_min2);
         x_max2 = x2.domain().slice(-1)[0];
-        
+        console.log("xmax2: " + x_max2);
         total_days2 = +Math.abs(x_max2 - x_min2)/86400000;
-        
+        console.log("totaldays2: " + total_days2);
         barWidth2 = width/total_days2;
     barChart();
 });
-
 
 
 
@@ -191,18 +250,10 @@ function barChart(){
       .attr("class", "y axis")
       .call(yAxis);
       
-    //.append("text")
-      //   .attr("transform", "rotate(-90)")
-      //   .attr("y", -50)
-        // .attr("x", -height/2)
-        // .style("text-anchor", "start")
-         //.text("Length of message")
-        // ;
-
     focusGraph = barsGroup.selectAll("rect")
       .data(dataset)
     .enter().append("rect")
-        .attr("class", function (d){if(d.direction ==1){return "keybar1";}else{return "keybar";}})//this is literally just to get different colors
+        .attr("class", function (d){if(d.direction ==1){return "bar1";}else{return "bar";}})//this is literally just to get different colors
         .attr("x", function(d) {return x_scale(d.Date);})//so happy it works now!! this needed to be tied to the dataset!
         .attr("width", barWidth)
         .attr("y", function(d) {if (d.direction ==1){d.content.length*mult_to_fit_y; } else if (d.direction ==0) {return height- d.content.length*mult_to_fit_y} })
@@ -215,12 +266,13 @@ function barChart(){
         .on('mouseover', tip.show)
         .on('mouseout', tip.hide);
       
-
+ console.log("max of domain: " + x2.domain);
+ console.log(dataset[2].direction); 
  
     context.selectAll("rect")
       .data(dataset)
     .enter().append("rect")
-      .attr("class", function (d){if(d.direction ==1){return "keybar1";}else{return "keybar";}})
+      .attr("class", function (d){if(d.direction ==1){return "bar1";}else{return "bar";}})
       .attr("x", function(d, i) {return x2(d.Date);})
       .attr("y", function(d) {if (d.direction ==1){d.content.length*mult2; } else if (d.direction ==0) {return height2- d.content.length*mult2} })
       .attr("width", barWidth2)

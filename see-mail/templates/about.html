@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>see-mail</title>
+
+<!-- Bootstrap -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href ="css/sample-d3.css">
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+
+</head>
+<body style="background-color:white">
+<!-- Navigation -->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<div class="container">
+<!-- Brand and toggle get grouped for better mobile display -->
+<div class="navbar-header">
+<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+<span class="sr-only">Toggle navigation</span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+<a class="navbar-brand" href="/">See-mail</a>
+</div>
+<!-- Collect the nav links, forms, and other content for toggling -->
+<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+<ul class="nav navbar-nav">
+<li class="active">
+<a href="/about">About</a><!--intro to project, tools used, basic summary of motivation, etc.-->
+</li>
+<li>
+<a href="/">3 Friendships</a>
+</li>
+<li>
+<a href="https://github.com/akasunic/final-project-dp15">Github</a>
+</li>
+<li>
+<a href="/resources">Recommended Resources</a>
+</li>
+<li>
+<a href="">Give Us Feedback!</a><!--Link to a feedback form, if desired (Google forms recommended)-->
+</li>
+</ul>
+</div>
+<!-- /.navbar-collapse -->
+</div>
+<!-- /.container -->
+</nav>
+<br><br><br>
+<div class="container">
+<center>
+	<h1>See-mail</h1>
+	<h2>Visualizing digital relationships</h2>
+</center>
+<font face="Arial" size="4">
+Digital communication has become common in every kind of relationship, be it professional or personal. Being able to go through communication patterns in personal relationships can help in understanding various aspects
+of the relationship such as whether the conversation has been two sided or has it been just one sided, whether the length of the communication has been long in times of distress or whether it has always maintained consistency etc.
+
+<be>
+In this project we aim to visualize various kinds of friendships and to understand how the friendship has changed over time. We intend to understand if communication has been consistant over time, what topics were discussed, whether the communication was two sided or just one sided.
+To understasnd these aspects, we extracted emails which reflected the following types of friendships:<br>
+<ul>
+	<li>
+		<h3>The Globetrotting Galpals</h3>
+		We looked through emails exchanged between two friends who like to travel. We scraped through the email content to know the places they spoke about and visited. We plotted the various locations visited on a world map.
+		Since the places were visited during different years, we plotted how many places were spoken about during each years using a histogram. Using a pie chart we plot how frequently each visited country was refered to.
+	</li>
+	<li>
+		<h3>The Flatmate Friends</h3>
+		We looked at the emails exchanged between two flatmates to understand the balance in the friendship,i.e. whether one person was communicating more or were they both communicating equally. We also
+		wanted to see how the communication changed between when the two were flatemates and when they were not. Using a timeline we plotted the communication history. Also we created a song for the
+		friendship based on the communications, where higher notes represented person A, lower notes represented person B, the pitch was determined by the length of the email and the tempo was decided by the communication frequency.
+	</li>
+
+	<li>
+		<h3>The Buddy Bunch</h3>
+		We looked at how email communication between a group of four friends varied over the years. We created two different forms of visualization to understand yearwise emailing frequency and month wise emailing frequency.
+		To understand yearwise email communication, we created a treemap, while a histogram represented the monthwise frequency. To recap the content discussed in monthwise email exchange, we extracted short snippets from
+		the emails which the user could see and could go back to the actual emails if something interesting came up. We also provide a keyword based search to remember when a particular topic was discussed.
+	</li>
+
+</ul>
+
+<h2>Previous Work</h2>
+<p>This work builds off exploratory work conducted by Judeth Oden Choi, Xu Wang, Eunki Chung, and Anna Kasunic in Process and Theory for Human-Computer Interaction at Carnegie Mellon University, taught by 
+Aniket Kittur, under the guidance of John Zimmerman.</p>
+
+<h2>Course</h2>
+<p>This site is part of the final project for The Data Pipeline course, taught in Spring 2015 by Jennifer Mankoff at Carnegie Mellon University.</p>
+
+<h2>Team Members</h2>
+<p>Team members were Sougata Sen, Anna Kasunic, and Evelyn Yang.</p>
+
+
+</font>
+</div>
+</body>
+</html>
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="js/bootstrap.min.js"></script>
+
+

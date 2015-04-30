@@ -14,12 +14,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
+
 import webapp2
-import json
-#import feedparser
-import logging
-import urllib2
 
 # this is for displaying HTML
 from webapp2_extras import jinja2
@@ -52,54 +49,70 @@ class MainHandler(BaseHandler):
         context = {}
         self.render_response('index.html', **context)
         
-class AnnaLength(BaseHandler):
+class friend1Length(BaseHandler):
     def get(self):
 	context = {}
-        self.render_response('anna-length.html', **context)
+        self.render_response('friend1-length.html', **context)
         
     def post(self):
         context = {}
-        self.render_response('index.html', **context))
+        self.render_response('friend1-length.html', **context)
 
-class AnnaKeywords(BaseHandler):
-    
-    @webapp2.cached_property
-    def jinja2(self):
-        # Returns a Jinja2 renderer cached in the app registry.
-        return jinja2.get_jinja2(app=self.app)
-    def render_response(self, _template, context):
-        values = {'url_for': self.uri_for}
-        logging.info(context)
-        values.update(context)
-        logging.info(context)
-        
-        self.response.headers['Content-Type'] = 'text/html'
-
-        # Renders a template and writes the result to the response.
-        try: 
-            rv = self.jinja2.render_template(_template, **values)
-            self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-            self.response.write(rv)
-        except TemplateNotFound:
-            self.abort(404)
-    
+class friend1Keywords(BaseHandler):
     
     def get(self):
 	#defines default search to be a
-        context = {'search_term':'a'}
-        self.render_response('anna-keywords.html', **context)
+        context = {}
+        self.render_response('friend1-keywords.html', **context)
         
     def post(self):
-        search_term = self.request.get('search_term')
-        context = {'search_term':search_term}
-        self.render_response('anna-keywords.html', **context)
+        context = {}
+        self.render_response('friend1-keywords.html', **context)
+        
+
+class About(BaseHandler):
+    
+    def get(self):
+	#defines default search to be a
+        context = {}
+        self.render_response('about.html', **context)
+        
+    def post(self):
+        context = {}
+        self.render_response('about.html', **context)
+
+class friend1(BaseHandler):
+    
+    def get(self):
+	#defines default search to be a
+        context = {}
+        self.render_response('friend1.html', **context)
+        
+    def post(self):
+        context = {}
+        self.render_response('friend1.html', **context)
+
+
+        
+class Resources(BaseHandler):
+    
+    def get(self):
+	#defines default search to be a
+        context = {}
+        self.render_response('resources.html', **context)
+        
+    def post(self):
+        context = {}
+        self.render_response('resources.html', **context)
 
     
 
 app = webapp2.WSGIApplication([('/', MainHandler),
-                            ('/anna-length', AnnaLength),
-                            ('/anna-keywords', AnnaKeywords)
+                            ('/friend1-length', friend1Length),
+                            ('/friend1-keywords', friend1Keywords),
+                            ('/about', About),
+                            ('/friend1', friend1),
                             
-                            
+                            ('/resources', Resources),
                             
                             ], debug=True)

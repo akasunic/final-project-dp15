@@ -1,3 +1,4 @@
+﻿# -*- coding: utf-8-sig -*-
 '''This script must be run from JEM, Jython Environment for Music
 It can be downloaded here: http://www.cs.cofc.edu/~manaris/jythonmusic/
 Site also includes tutorials and sample code
@@ -27,23 +28,26 @@ from datetime import datetime, timedelta
 #
 # 2) Consonants extend the duration of the previous note (if any).
 
+#----------------Your data here--------------
+json_file = ''#string representing location of json file to sonify
 
-# define vowels, will later match with corresponding musical pitches
-# i.e., first vowel goes with first pitch, and so on.
-vowels       = "aeiou"
- 
-# define consonants
-consonants = "bcdfghjklmnpqrstvwxyz"
+# define keywords, will later match with corresponding musical pitches and person writing email
+#examples are given 
+keywords       = ["rent", "good", "!"]
+
+#String representing first names (or parts of first names) as they appear in email
+Friend1 = '' 
+Friend2 = ''
+
+output_song = '' #Must be a .mid file
  
 # define parallel lists to hold pitches and durations
 pitches   = []
 durations = []
- 
-# factor used to scale durations 
-durationFactor = 0.1   # higher for longer durations
+
  
 # use the json file you created with parse_mbox
-with open("/Users/akasunic/Desktop/DataPipeline/Final Project/final-project-practice/data/data.json") as data:
+with open(json_file) as data:
    data=json.load(data)
 
 monthMap = {
@@ -70,32 +74,26 @@ for email in data:
 
 datesorted_data = sorted(data, key=lambda k: k['newDate']) #sort emails by date so we can loop through and append content
 
-date_prev = data[0]["newDate"] + timedelta(days=-1) #set a starting point that is one day before the first email sent
-
 for email in datesorted_data:
-   if email["From"][0:4]=="Kend": 
-      vowelPitches = [C3, D3, E3, G3, A3]#bass 
+   if email["From"][0:len(Friend1)+1]==Friend1: 
+      wordPitches = [C2, C4, G5]#bass 
       email_content = split(email['content'])
-      gap = email["newDate"]-date_prev
-      date_prev = email["newDate"]
-   elif email["From"][0:4]=="Anna":
-      vowelPitches = [C4, D4, E4, G4, A4]#treble {allows to distinguish between friends
+     
+   elif email["From"][0:len(Friend2)+1]==Friend2:
+      wordPitches = [E2, E4, E5]#treble {allows to distinguish between friends}
       email_content= split(email['content'])
-      gap = email["newDate"]-date_prev
-      date_prev = email["newDate"]
+
    else:
       email_content=''#don't include emails sent from others
    if len(email_content)>0:
-      for word in email:
-         for char in word:
-            if char in vowels:
-               index = find(vowels, char)
-               pitch = vowelPitches[index]
-               pitches.append(pitch)
-               duration = gap.days*durationFactor/len(email_content) #speed of melody based on both how quickly respond and how much is said
-               if duration <=0:
-                  duration = 0.001
-               durations.append(duration)
+      for keyword in keywords:
+         if keyword in email['content'].lower():
+            print keyword
+            index = keywords.index(keyword)
+            pitch = wordPitches[index]
+            pitches.append(pitch)
+            duration = .007*1000/len(email_content) #speed based on importance of word in conversation based on percent of total words
+            durations.append(duration)
 
 # now, pitches and durations have been created
 
@@ -109,6 +107,6 @@ melody.addNoteList(pitches, durations)
 # view and play melody
 View.notation(melody)
 Play.midi(melody)
-Write.midi(melody, "AnnaKendallFreq.mid")
+Write.midi(melody, output_song)
 #midi files can be opened in GarageBand on a Mac, and from there, converted to mp3 or other desired formats
 #There are also free online conversion sites, such as: http://www.zamzar.com/convert/midi-to-mp3/
