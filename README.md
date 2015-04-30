@@ -6,7 +6,8 @@ This repo is meant to provide code that can be easily reused and modified to cre
 
 http://see-mail.appspot.com
 
-Files have been commented, and some have
+Files have been commented-- some extensively so, to enable very easy running (if you don't want to change any settings). 
+Others may require you to go through and read the code a little more.
 
 Where to start: 
 
@@ -30,7 +31,7 @@ You can basically use these files as they are (just updating a few things to per
 But you can also play around with JEM (jythonmusic.org)-- there's a lot of cool things you can do that we didn't have a chance to explore.
 
 
-6) Read and modify our code to create your own app on Google Appspot. 
+5) Read and modify our code to create your own app on Google Appspot. 
 *The "see-mail" container contains the code for the main pages, plus one of the friendship (on our site, "The Flatmate Friends")
 *To access your json data from your mbox, and songs created using JEM in the app (the way we have our code currently set up), 
 make sure these files are in the 'data' folder. 
@@ -40,4 +41,4 @@ You might want to make your appspot private to you and the other person (or peop
 We haven't tried this out, but worth considering:
 http://stackoverflow.com/questions/3806016/how-to-protect-a-google-app-engine-app-with-a-password
 
-7) Give us feedback about what the experience of analyzing your own email relationship data was like! http://tinyurl.com/kck96gr
+6) Give us feedback about what the experience of analyzing your own email relationship data was like: http://tinyurl.com/kck96gr
